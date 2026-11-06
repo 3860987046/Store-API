@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;          // کلاس‌های رمزنگاری: SymmetricSecurityKey، SigningCredentials، SecurityAlgorithms
+using Microsoft.AspNetCore.Identity; // برای استفاده از IdentityUser
 using StoreAPI.Models;                          // مدل‌های پروژه، از جمله کلاس User
 using System.IdentityModel.Tokens.Jwt;          // کلاس‌های ساخت و نوشتن توکن JWT: JwtSecurityToken، JwtSecurityTokenHandler
 using System.Security.Claims;                   // کلاس Claim و ClaimTypes برای تعریف اطلاعات داخل توکن
@@ -23,7 +24,7 @@ namespace StoreAPI.Services
         // هدف: دریافت یک User و برگرداندن یک رشته‌ی توکن JWT امضاشده
         // مراحل: ساخت کلید ← ساخت اعتبارنامه امضا ← تعریف claims
         //         ← ساخت توکن ← سریالایز کردن به رشته
-        public string GenerateToken(User user)
+        public string GenerateToken(IdentityUser user)
         {      
             // _config["Jwt:Key"] رشته‌ی مخفی را می‌خواند
             // Encoding.UTF8.GetBytes آن را به آرایه بایت تبدیل می‌کند (رمزنگاری روی بایت کار می‌کند)
@@ -33,13 +34,14 @@ namespace StoreAPI.Services
             // ساخت اعتبارنامه‌ی امضا: کلید + الگوریتم HMAC-SHA256
             // این شیء تعیین می‌کند توکن چگونه امضا شود (alg = HS256)
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            
+
             var claims = new[]
             {
                 
                 // ToString چون مقدار Claim باید رشته باشد
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),                
-                new Claim(ClaimTypes.Name, user.Username),  
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),  
+                //   توجه شود کهuser.Username را به user.UserName تبیدل کردیم چون مربوط به کلاس UserIdentity بود نه کلاس User 
+                new Claim(ClaimTypes.Name, user.UserName),  
                 // new Claim(ClaimTypes.Role, user.Role)  // اگه Role داری
             };
 

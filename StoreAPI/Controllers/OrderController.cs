@@ -58,7 +58,7 @@ namespace OrderManagementSystem.Controllers
                 ClaimTypes.NameIdentifier); // خواندن شناسه از Claim استاندارد
 
             // بررسی می‌کنیم شناسه وجود داشته و یک عدد معتبر باشد
-            if (!int.TryParse(userIdValue, out var userId))
+            if (string.IsNullOrEmpty(userIdValue))
             {
                 return Unauthorized(); // در صورت نبود شناسه معتبر، پاسخ 401
             }
@@ -66,7 +66,7 @@ namespace OrderManagementSystem.Controllers
             // مرحله 2: ساخت یک سفارش جدید در حافظه
             var order = new Order
             {
-                UserId = userId, // اتصال سفارش به کاربر فعلی
+                UserId = userIdValue, // اتصال سفارش به کاربر فعلی
                 OrderDate = DateTime.UtcNow, // ثبت زمان فعلی بر اساس UTC
                 TotalAmount = 0 // مبلغ ابتدا صفر است و بعد محاسبه می‌شود
             };
@@ -207,7 +207,7 @@ namespace OrderManagementSystem.Controllers
                     case "userid":
                         // مقدار را به رشته تبدیل و سپس به int تبدیل و در UserId سفارش ذخیره کن
                         // ToString() چون مقدار از JSON به‌صورت object آمده ممکن است نوعش مشخص نباشد
-                        order.UserId = Convert.ToInt32(update.Value.ToString());
+                        order.UserId = update.Value.ToString();
                         break;
 
                     // اگر فیلد ارسال‌شده «totalamount» بود:
