@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAPI.Models
@@ -9,13 +10,13 @@ namespace StoreAPI.Models
         public int Id { get; set; }
         //هر سفارشی مربوط به یک User است
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public decimal TotalAmount { get; set; }
         // Navigation Property
         //اما یک سفارش لیستی از OrderItemها را دارد 
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-        public User User { get; set; } = null!;
+        public IdentityUser User { get; set; } = null!;
 
     }
     public class OrderItem

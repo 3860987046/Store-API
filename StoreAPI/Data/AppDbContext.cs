@@ -12,7 +12,7 @@ namespace StoreAPI.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
@@ -25,16 +25,19 @@ namespace StoreAPI.Data
         {
 
             base.OnModelCreating(modelBuilder);
-
+           
             //modelbuilder یک ابزاری در EF است که تنظیمات مربوط به Entity کاربر رو انجام میده.
-            modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)       //روی این ستون یه ایندکس تعریف کن
+           /*چون IdentityUserخودش این تنظیمات را دارد 
+            modelBuilder.Entity<IdentityUser>()
+            .HasIndex(u => u.UserName)       //روی این ستون یه ایندکس تعریف کن
             .IsUnique();                    //مقدار این ستون نباید تکراری باشد
+           */
 
             // رابطه Order با User - اصلاح شده
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)           // هر سفارش یک کاربر دارد
-                .WithMany(u => u.Orders)       // هر کاربر می‌تواند چندین سفارش داشته باشد
+                .WithMany()       // هر کاربر می‌تواند چندین سفارش داشته باشد.
+                                  // چون در IdentityUser فیلید Ordersتعریف نشده ان را فعلا پاک میکنیم
                 .HasForeignKey(o => o.UserId)  // فیلد ارتباطی: UserId در جدول Orders
                 .OnDelete(DeleteBehavior.Restrict); // اگر کاربر حذف شد، سفارش‌هایش حذف نشوند
 
