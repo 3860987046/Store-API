@@ -67,7 +67,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
-});
+}, ServiceLifetime.Transient);
 
 // ==========================================
 // 4. تنظیمات ASP.NET Identity (مدیریت کاربران)
@@ -89,6 +89,10 @@ builder.Services.AddScoped<JwtService>();
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+ 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 
 builder.Services.AddAuthentication(options =>
 {

@@ -2,11 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 using System.Security.Claims;
+using MediatR;
 using StoreAPI.DTOs;
 using StoreAPI.Models;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using MediatR;
+using StoreAPI.Features.Orders.Commands;
 
 namespace OrderManagementSystem.Controllers
 {
@@ -15,10 +18,12 @@ namespace OrderManagementSystem.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMediator _mediator;
 
-        public OrdersController(AppDbContext context)
+        public OrdersController(AppDbContext context , IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
         }
 
         // GET: api/orders
@@ -49,85 +54,26 @@ namespace OrderManagementSystem.Controllers
         }
 
         // POST: api/orders
-        [HttpPost] // این متد با درخواست POST اجرا می‌شود
-        public async Task<IActionResult> CreateOrder(
-                   [FromBody] CreateOrderDto dto) // دریافت اطلاعات سفارش از بدنه درخواست
+        [HttpPost] 
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto) 
         {
-            // مرحله 1: دریافت شناسه کاربر احراز هویت‌شده
-            var userIdValue = User.FindFirstValue(
-                ClaimTypes.NameIdentifier); // خواندن شناسه از Claim استاندارد
-
-            // بررسی می‌کنیم شناسه وجود داشته و یک عدد معتبر باشد
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier); 
             if (string.IsNullOrEmpty(userIdValue))
             {
-                return Unauthorized(); // در صورت نبود شناسه معتبر، پاسخ 401
+                return Unauthorized(); 
+            }
+            //  گارسون برگه سفارش رو میفرسته به صندوق
+            try
+            {
+                var orderId = await _mediator.Send(new CreateOrderCommand(userIdValue, dto.Items));
+                return Ok(new { Message = "سفارش با موفقیت ثبت شد", OrderId = orderId });
+            }
+            catch (Exception ex)
+            {
+                // اگر آشپز خطا داد (مثلاً موجودی کم بود)، پیام رو به کاربر میدیم
+                return BadRequest(new { Message = ex.Message });
             }
 
-            // مرحله 2: ساخت یک سفارش جدید در حافظه
-            var order = new Order
-            {
-                UserId = userIdValue, // اتصال سفارش به کاربر فعلی
-                OrderDate = DateTime.UtcNow, // ثبت زمان فعلی بر اساس UTC
-                TotalAmount = 0 // مبلغ ابتدا صفر است و بعد محاسبه می‌شود
-            };
-
-            // مرحله 3: بررسی تک‌تک محصولات ارسال‌شده
-            foreach (var item in dto.Items)
-            {
-                // محصول را با شناسه ارسالی از دیتابیس پیدا می‌کنیم
-                var product = await _context.Products
-                    .FirstOrDefaultAsync(
-                        p => p.Id == item.ProductId);
-
-                // اگر محصول در دیتابیس وجود نداشته باشد
-                if (product == null)
-                {
-                    return BadRequest(
-                        $"Product {item.ProductId} not found."); // پاسخ 400
-                }
-
-                // بررسی می‌کنیم موجودی برای تعداد درخواستی کافی باشد
-                if (product.StockQuantity < item.Quantity)
-                {
-                    return BadRequest(
-                        $"Insufficient stock for {product.Name}."); // موجودی ناکافی
-                }
-
-                // مرحله 4: خواندن قیمت معتبر از دیتابیس
-                var unitPrice = product.Price; // قیمت را از ورودی کاربر نمی‌گیریم
-
-                // محاسبه مبلغ این ردیف: قیمت واحد ضربدر تعداد
-                var lineTotal = unitPrice * item.Quantity;
-
-                // ایجاد ردیف سفارش برای محصول فعلی
-                order.OrderItems.Add(new OrderItem
-                {
-                    ProductId = product.Id, // شناسه محصول معتبر از دیتابیس
-                    Quantity = item.Quantity, // تعداد اعتبارسنجی‌شده
-                    UnitPrice = unitPrice // ذخیره قیمت واقعی در زمان سفارش
-                });
-
-                // مرحله 5: افزودن مبلغ این ردیف به مبلغ کل سفارش
-                order.TotalAmount += lineTotal;
-
-                // کاهش موجودی محصول در حافظه
-                product.StockQuantity -= item.Quantity;
-            }
-
-            // مرحله 6: اضافه‌کردن سفارش به مجموعه سفارش‌های EF Core
-            _context.Orders.Add(order);
-
-            // ذخیره سفارش، ردیف‌های سفارش و تغییرات موجودی در دیتابیس
-            await _context.SaveChangesAsync();
-
-            // ارسال پاسخ موفق همراه با اطلاعات اصلی سفارش
-            return Ok(new
-            {
-                order.Id, // شناسه‌ای که دیتابیس برای سفارش ساخته است
-                order.UserId, // شناسه کاربر سفارش‌دهنده
-                order.TotalAmount, // مبلغ محاسبه‌شده در سمت سرور
-                order.OrderDate // زمان ثبت سفارش
-            });
         }
    
 
