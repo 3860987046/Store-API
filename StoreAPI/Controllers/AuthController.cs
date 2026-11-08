@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using StoreAPI.DTOs;
 using StoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;
+using MediatR;
+using StoreAPI.Features.Auth.Commands;
 
 
 namespace StoreAPI.Controllers
@@ -15,11 +17,13 @@ namespace StoreAPI.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly JwtService _jwtService;
+        private readonly IMediator _mediator; 
 
-        public AuthController(UserManager<IdentityUser> userManager , JwtService jwtService)
+        public AuthController(UserManager<IdentityUser> userManager , JwtService jwtService , IMediator mediator)
         {
             _userManager = userManager;
             _jwtService = jwtService;
+            _mediator = mediator;
         }
 
 
@@ -35,24 +39,8 @@ namespace StoreAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // بررسی اینکه آیا نام کاربری قبلاً وجود دارد یا نه
-            var userExists = await _userManager.FindByNameAsync(registerDto.Username) != null;
-            if (userExists)
-                return BadRequest(new { Message = "نام کاربری قبلاً ثبت شده است" });
-
-            // بررسی اینکه آیا ایمیل قبلاً وجود دارد یا نه
-            var emailExists = await _userManager.FindByEmailAsync(registerDto.Email) != null;
-            if (emailExists)
-                return BadRequest(new { Message = "ایمیل قبلاً ثبت شده است" });
-
-            // ساخت یک شیء از کاربر (فقط اطلاعات پایه، پسورد را UserManager خودش هش می‌کند)
-            var user = new IdentityUser
-            {
-                UserName = registerDto.Username,
-                Email = registerDto.Email
-            };
-            // ذخیره کاربر در دیتابیس با پسورد (UserManager پسورد را هش می‌کند و ذخیره می‌کند)
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
+            //  گارسون با استفاده از ابزار mediator برگه سفارش رو مطابق سازنده پر میکنه و میندازه توی صندوق 
+            var result = await _mediator.Send(new RegisterCommand(registerDto.Username, registerDto.Email, registerDto.Password));
 
             if (!result.Succeeded)
             {
@@ -70,35 +58,29 @@ namespace StoreAPI.Controllers
         // 2. لاگین (Login) و دریافت توکن JWT
         // ==========================================
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto model)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // 1. پیدا کردن کاربر با نام کاربری
-            var user = await _userManager.FindByNameAsync(model.Username);
-
-            // 2. اگر کاربر وجود نداشت، پیام خطای عمومی می‌دهیم (نمی‌گوییم "نام کاربری اشتباه است")
-            if (user == null)
-                return Unauthorized(new { Message = "نام کاربری یا پسورد اشتباه است" });
-
-            // 3. چک کردن پسورد با استفاده از UserManager (مقایسه پسورد خام با هش ذخیره شده)
-            var isPasswordValid = await _userManager.CheckPasswordAsync(user, model.Password);
-
+            //'گارسون یا ابزار mediatorیک برگه سفارش لاگین جدید مطابق سازنده پر میکنه و اون رو sendمیکنه
+            var token = await _mediator.Send(new LoginCommand(loginDto.Username, loginDto.Password));  
             // 4. اگر پسورد اشتباه بود، باز هم همان پیام عمومی را می‌دهیم (برای امنیت)
-            if (!isPasswordValid)
+            if (token==null)
                 return Unauthorized(new { Message = "نام کاربری یا پسورد اشتباه است" });
 
-            // 5. تولید توکن JWT برای این کاربر
-            var token = _jwtService.GenerateToken(user);
+
+            // برای برگردوندن UserId، دوباره کاربر رو پیدا میکنیم (چون Command فقط توکن رو برگردوند)
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
+
 
             // 6. برگرداندن توکن به همراه اطلاعات پایه کاربر
             return Ok(new
             {
                 Message = "ورود موفقیت‌آمیز بود",
                 Token = token,
-                UserId = user.Id,
-                Username = user.UserName
+                UserId = user?.Id,
+                Username = user?.UserName
             });
         }
 

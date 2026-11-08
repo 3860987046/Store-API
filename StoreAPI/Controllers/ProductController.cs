@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 using StoreAPI.DTOs;
 using StoreAPI.Models;
+using StoreAPI.Features.Orders.Queries;
 
 namespace StoreAPI.Controllers
 {
@@ -11,10 +13,11 @@ namespace StoreAPI.Controllers
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public ProductController(AppDbContext context)
+        private readonly IMediator _mediator;
+        public ProductController(AppDbContext context, IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
         }
 
         // GET: api/products
@@ -23,7 +26,7 @@ namespace StoreAPI.Controllers
         {
             return await _context.Products.ToListAsync();
         }
-
+        /*
         // GET: api/products/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProductById(int id)
@@ -34,6 +37,13 @@ namespace StoreAPI.Controllers
                 return NotFound();
 
             return product;
+        }*/
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductById(int id)
+        {
+            var product = await _mediator.Send(new GetProductByIdQuery { Id = id });
+            return Ok(product);
         }
 
         // GET: api/products/filter?minPrice=10&maxPrice=100
@@ -71,6 +81,8 @@ namespace StoreAPI.Controllers
 
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
+
+            //این خط به کلاینت (اپلیکیشن) می‌گه: «محصول با موفقیت ساخته شد! این هم اطلاعاتش. اگر می‌خوای همین الان اطلاعاتش رو ببینی، برو به این آدرس (URL) که بهت می‌دم.»
 
             return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
         }
