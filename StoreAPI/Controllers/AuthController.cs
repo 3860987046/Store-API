@@ -13,19 +13,11 @@ namespace StoreAPI.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class AuthController : Controller
+    public class AuthController(
+        UserManager<IdentityUser> _userManager, 
+        JwtService _jwtService, 
+        IMediator _mediator) : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly JwtService _jwtService;
-        private readonly IMediator _mediator; 
-
-        public AuthController(UserManager<IdentityUser> userManager , JwtService jwtService , IMediator mediator)
-        {
-            _userManager = userManager;
-            _jwtService = jwtService;
-            _mediator = mediator;
-        }
-
 
         // POST: api/Auth/register
         // ==========================================
