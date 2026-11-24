@@ -16,6 +16,7 @@ namespace StoreAPI.Models
         //معمولا Navigation Property را به صورت اینترفیس تعریف کنیم
         //ICollection چون یک رفرنس تایپ است بهتر است برای جلوگیری از null بودن یک مجموعه خالی اولیه بگیرد 
         public ICollection<OrderItem> OrderItem { get; set; } = new List<OrderItem>();
+        public List<Comment> Comments { get; set; } = new();
 
     }
 }

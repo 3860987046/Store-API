@@ -7,10 +7,10 @@ namespace StoreAPI.DTOs
     {
         [Required] // ارسال فهرست محصولات الزامی است
         [MinLength(1)] // سفارش باید حداقل یک ردیف محصول داشته باشد
-        public List<CreateOrderItemDto> Items { get; set; } = new(); // فهرست محصولات سفارش
+        public List<OrderItemDto> Items { get; set; } = new(); // فهرست محصولات سفارش
     }
 
-    public class CreateOrderItemDto // اطلاعات هر محصول در سفارش
+    public class OrderItemDto // اطلاعات هر محصول در سفارش
     {
         [Range(1, int.MaxValue)] // شناسه محصول باید حداقل 1 باشد
         public int ProductId { get; set; } // شناسه محصول انتخاب‌شده

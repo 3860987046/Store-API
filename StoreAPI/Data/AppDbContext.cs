@@ -15,6 +15,7 @@ namespace StoreAPI.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         //تنظیمات مربوط به مدل‌ها و ارتباط آن‌ها با دیتابیس
 

@@ -10,9 +10,10 @@ namespace StoreAPI.Models
         public int Id { get; set; }
         //هر سفارشی مربوط به یک User است
         [ForeignKey("User")]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public decimal TotalAmount { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
         // Navigation Property
         //اما یک سفارش لیستی از OrderItemها را دارد 
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
@@ -35,5 +36,14 @@ namespace StoreAPI.Models
         // Navigation Property
         public Order Order { get; set; } = null!;
         public Product Product { get; set; }
+    }
+
+    public enum OrderStatus
+    {
+        Pending = 0,      // در انتظار پرداخت
+        Processing = 1,   // در حال پردازش
+        Shipped = 2,      // ارسال شده
+        Delivered = 3,    // تحویل داده شده
+        Cancelled = 4     // لغو شده
     }
 }
