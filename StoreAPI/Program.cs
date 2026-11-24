@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using FluentValidation;
 using StoreAPI.Data;
 using StoreAPI.Models;
 using StoreAPI.Services;
@@ -67,7 +68,12 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+    //این دو خط برای دیباگ کردن و دیدن کوئری‌های واقعی دیتابیس هستن
+    option.LogTo(Console.WriteLine, LogLevel.Information);
+    // به EF می‌گه: مقادیر واقعی پارامترها رو هم توی لاگ نشون بده
+    option.EnableSensitiveDataLogging();
 }, ServiceLifetime.Transient);
+
 
 // ==========================================
 // 4. تنظیمات ASP.NET Identity (مدیریت کاربران)
@@ -90,9 +96,12 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
- 
+
+// به MediatR می‌گیم: برو توی کل پروژه بگرد و همه‌ی Handlerها رو خودکار پیدا کن و ثبت کن
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+// به FluentValidation می‌گیم: برو توی کل پروژه بگرد و همه‌ی Validatorها رو خودکار پیدا کن و ثبت کن
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -111,7 +120,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,   // آیا امضای توکن با کلید ما تطابق دارد؟
         ValidIssuer = jwtIssuer,           // Issuer معتبر ما
         ValidAudience = jwtAudience,       // Audience معتبر ما
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)) // کلید مخفی
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)) // کلید مخفی//علامت تعجب میگه من تضمین میکنم null نیست
     };
 });
 
@@ -151,6 +160,25 @@ using (var scope = app.Services.CreateScope())
 
     // هر بار که برنامه اجرا می‌شود، مایگریشن‌ها را روی دیتابیس اعمال می‌کند (برای توسعه عالی است)
     dbContext.Database.Migrate();
+
+    //RoleManager رو از سیستم می‌گیره.
+    //چک می‌کنه آیا نقش Admin توی جدول AspNetRoles هست یا نه.
+    //اگر نبود، اون رو می‌سازه.
+    //همین کار رو برای نقش Customer هم انجام می‌ده.
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+    if (!await roleManager.RoleExistsAsync("Customer"))
+        await roleManager.CreateAsync(new IdentityRole("Customer"));
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var adminUser = await userManager.FindByNameAsync("shabnam"); //  اسم کاربری خودت
+    if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+    {
+        await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
 
     // اگر جدول محصولات خالی بود، چند محصول نمونه اضافه می‌کند تا تست راحت‌تر باشد
     if (!dbContext.Products.Any())
