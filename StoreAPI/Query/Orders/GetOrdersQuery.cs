@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 using StoreAPI.Models;
 
-namespace StoreAPI.Query.Order
+namespace StoreAPI.Query.Orders
 {
     public class GetOrdersQuery : IRequest<IEnumerable<Order>> { };
 

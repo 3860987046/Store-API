@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace StoreAPI.Query.User
+namespace StoreAPI.Query.Auths
 {
     public class GetUserByIdResponse
     {

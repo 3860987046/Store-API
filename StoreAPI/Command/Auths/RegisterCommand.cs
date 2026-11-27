@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using StoreAPI.Controllers;
 
-namespace StoreAPI.Command.Auth
+namespace StoreAPI.Command.Auths
 {
 
     public class RegisterCommand : IRequest<IdentityResult>

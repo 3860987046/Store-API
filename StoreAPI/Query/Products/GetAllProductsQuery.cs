@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 using StoreAPI.Models;
 
-namespace StoreAPI.Query.Product
+namespace StoreAPI.Query.Products
 {
     public class GetAllProductsQuery : IRequest<List<Product>> { }
 

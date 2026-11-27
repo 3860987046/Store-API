@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using StoreAPI.Services;
 
-namespace StoreAPI.Command.Auth
+namespace StoreAPI.Command.Auths
 {
     public class LoginResponse
     {

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 
-namespace StoreAPI.Query.Comment
+namespace StoreAPI.Query.Comments
 {
     public class CommentApprovedResponse
     {

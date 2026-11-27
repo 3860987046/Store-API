@@ -4,7 +4,7 @@ using StoreAPI.Data;
 using StoreAPI.DTOs;
 using StoreAPI.Models;
 
-namespace StoreAPI.Command.Product
+namespace StoreAPI.Command.Products
 {
     public class CreateProductCommand : IRequest<int>
     {

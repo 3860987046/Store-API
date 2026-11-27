@@ -2,9 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StoreAPI.DTOs;
-using StoreAPI.Command; 
-using StoreAPI.Query;  
-using System.Security.Claims;
+using StoreAPI.Command.Products; 
+using StoreAPI.Query.Products;  
 
 namespace StoreAPI.Controllers
 {

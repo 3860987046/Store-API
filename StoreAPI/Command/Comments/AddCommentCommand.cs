@@ -3,7 +3,7 @@ using MediatR;
 using StoreAPI.Data;
 using StoreAPI.Models;
 
-namespace StoreAPI.Command.Comment
+namespace StoreAPI.Command.Comments
 {
     public class AddCommentCommand : IRequest<int>
     {

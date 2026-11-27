@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StoreAPI.Command;
+using StoreAPI.Command.Orders;
 using StoreAPI.DTOs;
 using System.Security.Claims;
 
@@ -9,7 +9,7 @@ namespace StoreAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // 👈 همه متدهای این کنترلر نیاز به لاگین دارند
+    [Authorize] //  همه متدهای این کنترلر نیاز به لاگین دارند
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;

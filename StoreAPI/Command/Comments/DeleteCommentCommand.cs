@@ -1,29 +1,28 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 
-namespace StoreAPI.Command.Comment
+namespace StoreAPI.Command.Comments
 {
-    public class ApproveCommentCommand : IRequest<bool>
+    public class DeleteCommentCommand : IRequest<bool>
     {
         public int CommentId { get; init; }
 
-        public ApproveCommentCommand(int commentId)
+        public DeleteCommentCommand(int commentId)
         {
             CommentId = commentId;
         }
     }
 
-    public class ApproveCommentCommandHandler(AppDbContext _context) : IRequestHandler<ApproveCommentCommand, bool>
+    public class DeleteCommentCommandHandler(AppDbContext _context) : IRequestHandler<DeleteCommentCommand, bool>
     {
 
-        public async Task<bool> Handle(ApproveCommentCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
         {
             var comment = await _context.Comments.FindAsync(request.CommentId, cancellationToken);
             if (comment == null)
                 throw new Exception("کامنت یافت نشد.");
 
-            comment.IsApproved = true; // 👈 تایید کامنت
+            _context.Comments.Remove(comment);
             await _context.SaveChangesAsync(cancellationToken);
 
             return true;

@@ -5,7 +5,7 @@ using StoreAPI.Data;
 using StoreAPI.DTOs;
 using StoreAPI.Models;
 
-namespace StoreAPI.Command
+namespace StoreAPI.Command.Orders
 {
     public class UpdateOrderCommand : IRequest<bool>
     {

@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StoreAPI.Command;
+using StoreAPI.Command.Comments;
 using StoreAPI.DTOs;
-using StoreAPI.Query;
+using StoreAPI.Query.Comments;
 using System.Security.Claims;
 
 namespace StoreAPI.Controllers

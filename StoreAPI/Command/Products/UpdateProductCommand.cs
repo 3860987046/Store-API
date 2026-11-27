@@ -3,7 +3,7 @@ using MediatR;
 using StoreAPI.Data;
 using StoreAPI.DTOs;
 
-namespace StoreAPI.Command.Product
+namespace StoreAPI.Command.Products
 {
     public class UpdateProductCommand : IRequest<bool>
     {

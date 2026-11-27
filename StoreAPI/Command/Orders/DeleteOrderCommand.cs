@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 using StoreAPI.Models;
 
-namespace StoreAPI.Command.Order
+namespace StoreAPI.Command.Orders
 {
     public class DeleteOrderCommand : IRequest<bool>
     {

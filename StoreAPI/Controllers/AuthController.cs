@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using StoreAPI.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using StoreAPI.Command;
-using StoreAPI.Query;
+using StoreAPI.Command.Auths;
+using StoreAPI.Query.Auths;
 
 namespace StoreAPI.Controllers
 {

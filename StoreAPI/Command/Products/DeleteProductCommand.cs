@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using StoreAPI.Data;
 
-namespace StoreAPI.Command.Product
+namespace StoreAPI.Command.Products
 {
     public class DeleteProductCommand : IRequest<bool>
     {
